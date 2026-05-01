@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Customer Segmentation — Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --pink:   #c878a8;
+      --purple: #9060c8;
+      --lilac:  #a078c8;
+      --soft:   #c0a0d0;
+      --blush:  #f090c0;
+      --bg:     #f5f4f8;
+      --dark:   #2a1a3e;
+      --muted:  #8878a0;
+    }
+    html { scroll-behavior: smooth; }
+    body { background: var(--bg); font-family: 'DM Sans', sans-serif; color: var(--dark); }
+    nav {
+      position: sticky; top: 0;
+      background: rgba(245,244,248,0.9); backdrop-filter: blur(12px);
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 1rem 2.5rem; z-index: 100; border-bottom: 0.5px solid #e0d8ec;
+    }
+    .logo { font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; color: var(--dark); letter-spacing:.07em; }
+    .nav-right { display: flex; align-items: center; gap: 1.5rem; }
+    .nav-tag { font-size: 11px; color: var(--muted); }
+    .back-btn { font-size: 11px; color: var(--purple); text-decoration: none; font-weight: 500; border: 0.5px solid #d8c8e8; border-radius: 100px; padding: 5px 14px; transition: background .2s; }
+    .back-btn:hover { background: #eeedfe; }
+    .hero { background: linear-gradient(135deg, #2a1a3e 0%, #4a2a6e 100%); padding: 4rem 2.5rem 3rem; position: relative; overflow: hidden; }
+    .hero::after { content:''; position: absolute; width: 400px; height: 400px; background: var(--pink); border-radius: 50%; top: -150px; right: -100px; opacity: .15; }
+    .hero-badge { display: inline-block; background: rgba(200,120,168,.2); border: 0.5px solid rgba(200,120,168,.4); color: #f0b0d8; font-size: 11px; letter-spacing:.1em; text-transform: uppercase; border-radius: 100px; padding: 5px 15px; margin-bottom: 1.2rem; }
+    .hero h1 { font-family: 'Syne', sans-serif; font-size: clamp(28px, 4vw, 42px); font-weight: 800; color: #fff; line-height: 1.1; margin-bottom: .8rem; position: relative; z-index:1; }
+    .hero h1 em { font-style: normal; color: var(--blush); }
+    .hero p { font-size: 13px; color: rgba(255,255,255,.6); max-width: 480px; line-height:1.8; position:relative; z-index:1; }
+    .stats-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 1px; background: #e0d8ec; border-bottom: 1px solid #e0d8ec; }
+    .stat { background: #fff; padding: 1.5rem 2rem; text-align: center; }
+    .stat-val { font-family: 'Syne', sans-serif; font-size: 26px; font-weight: 800; color: var(--purple); }
+    .stat-lbl { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing:.07em; margin-top: 4px; }
+    .container { max-width: 1100px; margin: 0 auto; padding: 3rem 2rem; }
+    .section-title { display: flex; align-items: center; gap: 12px; margin-bottom: 1.5rem; }
+    .section-title h2 { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 700; }
+    .pill { font-size: 10px; background: #eeedfe; color: var(--purple); border-radius: 100px; padding: 3px 10px; text-transform: uppercase; letter-spacing:.07em; }
+    .divider { border: none; border-top: 0.5px solid #e0d8ec; margin: 3rem 0; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem; }
+    .chart-card { background: #fff; border-radius: 16px; border: 0.5px solid #e0d8ec; overflow: hidden; box-shadow: 0 2px 12px rgba(42,26,62,.05); }
+    .chart-card-header { padding: 1.2rem 1.5rem; border-bottom: 0.5px solid #f0e8f8; display: flex; align-items: center; justify-content: space-between; }
+    .chart-card-header h3 { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; }
+    .chart-card-header p { font-size: 11px; color: var(--muted); margin-top: 2px; }
+    .chart-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--pink); }
+    .chart-body { padding: 1.5rem; }
+    .insights-grid { display: grid; grid-template-columns: repeat(5,1fr); gap: 1rem; margin-top: 1.5rem; }
+    .insight-card { background: #fff; border: 0.5px solid #e0d8ec; border-radius: 14px; padding: 1.3rem 1rem; text-align: center; transition: transform .2s, box-shadow .2s; }
+    .insight-card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(144,96,200,.12); }
+    .insight-card:nth-child(1) { border-top: 3px solid #c878a8; }
+    .insight-card:nth-child(2) { border-top: 3px solid #9060c8; }
+    .insight-card:nth-child(3) { border-top: 3px solid #a078c8; }
+    .insight-card:nth-child(4) { border-top: 3px solid #f090c0; }
+    .insight-card:nth-child(5) { border-top: 3px solid #c0a0d0; }
+    .insight-emoji { font-size: 28px; margin-bottom: .6rem; }
+    .insight-label { font-family: 'Syne', sans-serif; font-size: 12px; font-weight: 700; line-height: 1.3; margin-bottom: .4rem; }
+    .insight-stat { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 800; color: var(--purple); margin-top: .5rem; }
+    .insight-stat-lbl { font-size: 10px; color: var(--muted); }
+    .insight-desc { font-size: 11px; color: var(--muted); line-height: 1.6; margin-top: .5rem; }
+    footer { background: var(--dark); color: rgba(255,255,255,.4); text-align: center; padding: 1.5rem; font-size: 11px; letter-spacing:.05em; }
+    footer span { color: var(--blush); }
+  </style>
+</head>
+<body>
+<nav>
+  <span class="logo">Synent Technologies</span>
+  <div class="nav-right">
+    <span class="nav-tag">Task 06 · Customer Segmentation</span>
+    <a class="back-btn" href="intro.html">← Back</a>
+  </div>
+</nav>
+<div class="hero">
+  <div class="hero-badge">K-Means Clustering · Mall Customer Dataset</div>
+  <h1>Customer <em>Segmentation</em><br>Dashboard</h1>
+  <p>Interactive analysis of 200 mall customers segmented by annual income and spending score. Hover over any chart point to see exact values.</p>
+</div>
+<div class="stats-row">
+  <div class="stat"><div class="stat-val">200</div><div class="stat-lbl">Total Customers</div></div>
+  <div class="stat"><div class="stat-val">5</div><div class="stat-lbl">Clusters Found</div></div>
+  <div class="stat"><div class="stat-val">K=5</div><div class="stat-lbl">Optimal K</div></div>
+  <div class="stat"><div class="stat-val">5</div><div class="stat-lbl">Features</div></div>
+</div>
+<div class="container">
+  <div class="section-title">
+    <h2>Exploratory Data Analysis</h2>
+    <span class="pill">EDA</span>
+  </div>
+  <div class="grid-2">
+    <div class="chart-card">
+      <div class="chart-card-header">
+        <div><h3>Gender Distribution</h3><p>Male vs Female customer breakdown</p></div>
+        <div class="chart-dot"></div>
+      </div>
+      <div class="chart-body"><canvas id="genderChart" height="230"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-card-header">
+        <div><h3>Age Distribution</h3><p>Customer age spread across dataset</p></div>
+        <div class="chart-dot" style="background:var(--lilac)"></div>
+      </div>
+      <div class="chart-body"><canvas id="ageChart" height="230"></canvas></div>
+    </div>
+  </div>
+  <div class="grid-2">
+    <div class="chart-card">
+      <div class="chart-card-header">
+        <div><h3>Annual Income Distribution</h3><p>Income spread in k$ across customers</p></div>
+        <div class="chart-dot" style="background:var(--purple)"></div>
+      </div>
+      <div class="chart-body"><canvas id="incomeChart" height="230"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-card-header">
+        <div><h3>Spending Score Distribution</h3><p>Score range 1–100 across customers</p></div>
+        <div class="chart-dot" style="background:var(--blush)"></div>
+      </div>
+      <div class="chart-body"><canvas id="spendingChart" height="230"></canvas></div>
+    </div>
+  </div>
+  <div class="chart-card">
+    <div class="chart-card-header">
+      <div><h3>Feature Correlation</h3><p>Relationship strength between Age, Income and Spending Score</p></div>
+      <div class="chart-dot" style="background:var(--soft)"></div>
+    </div>
+    <div class="chart-body"><canvas id="corrChart" height="100"></canvas></div>
+  </div>
+  <hr class="divider"/>
+  <div class="section-title">
+    <h2>Elbow Method</h2>
+    <span class="pill">Optimal K</span>
+  </div>
+  <div class="chart-card">
+    <div class="chart-card-header">
+      <div><h3>Inertia vs Number of Clusters</h3><p>Elbow clearly visible at K=5 — chosen as optimal cluster count</p></div>
+      <div class="chart-dot" style="background:var(--blush)"></div>
+    </div>
+    <div class="chart-body"><canvas id="elbowChart" height="120"></canvas></div>
+  </div>
+  <hr class="divider"/>
+  <div class="section-title">
+    <h2>Cluster Visualization</h2>
+    <span class="pill">K-Means · K=5</span>
+  </div>
+  <div class="chart-card">
+    <div class="chart-card-header">
+      <div><h3>Annual Income vs Spending Score</h3><p>Hover any point to see exact Income & Spending values</p></div>
+      <div class="chart-dot" style="background:var(--soft)"></div>
+    </div>
+    <div class="chart-body"><canvas id="clusterChart" height="200"></canvas></div>
+  </div>
+  <hr class="divider"/>
+  <div class="section-title">
+    <h2>Business Insights</h2>
+    <span class="pill">5 Segments</span>
+  </div>
+  <div class="insights-grid">
+    <div class="insight-card">
+      <div class="insight-emoji">💰</div>
+      <div class="insight-label">High Income Low Spender</div>
+      <div class="insight-stat">~87k$</div>
+      <div class="insight-stat-lbl">Avg Income · Score ~17</div>
+      <div class="insight-desc">Earn well but cautious. Target with premium loyalty programs.</div>
+    </div>
+    <div class="insight-card">
+      <div class="insight-emoji">🎯</div>
+      <div class="insight-label">High Income High Spender</div>
+      <div class="insight-stat">~86k$</div>
+      <div class="insight-stat-lbl">Avg Income · Score ~82</div>
+      <div class="insight-desc">Best customers. Retain with exclusive VIP offers.</div>
+    </div>
+    <div class="insight-card">
+      <div class="insight-emoji">📊</div>
+      <div class="insight-label">Average Everything</div>
+      <div class="insight-stat">~55k$</div>
+      <div class="insight-stat-lbl">Avg Income · Score ~49</div>
+      <div class="insight-desc">Middle ground. Nurture with seasonal deals and discounts.</div>
+    </div>
+    <div class="insight-card">
+      <div class="insight-emoji">🛍️</div>
+      <div class="insight-label">Low Income High Spender</div>
+      <div class="insight-stat">~26k$</div>
+      <div class="insight-stat-lbl">Avg Income · Score ~79</div>
+      <div class="insight-desc">Spend beyond means. Offer EMI & budget deals.</div>
+    </div>
+    <div class="insight-card">
+      <div class="insight-emoji">💤</div>
+      <div class="insight-label">Low Income Low Spender</div>
+      <div class="insight-stat">~26k$</div>
+      <div class="insight-stat-lbl">Avg Income · Score ~20</div>
+      <div class="insight-desc">Price sensitive. Minimal marketing spend recommended.</div>
+    </div>
+  </div>
+</div>
+<footer>
+  Synent Technologies · Task 06 · Customer Segmentation · <span>Data Science Internship</span>
+</footer>
+<script>
+  const T = {
+    backgroundColor: '#2a1a3e', titleColor: '#f090c0', bodyColor: '#fff',
+    padding: 10, cornerRadius: 8, titleFont: { family: 'Syne', weight: '700' }
+  };
+  new Chart(document.getElementById('genderChart'), {
+    type: 'bar',
+    data: {
+      labels: ['Female','Male'],
+      datasets: [{ label: 'Customers', data: [112, 88], backgroundColor: ['#c878a8','#9060c8'], borderRadius: 8, borderSkipped: false }]
+    },
+    options: { responsive: true, plugins: { legend: { display: false }, tooltip: { ...T, callbacks: { label: c => ` ${c.raw} customers (${((c.raw/200)*100).toFixed(1)}%)` } } }, scales: { y: { grid: { color: '#f0e8f8' }, ticks: { color: '#8878a0' } }, x: { grid: { display: false }, ticks: { color: '#8878a0' } } } }
+  });
+  new Chart(document.getElementById('ageChart'), {
+    type: 'bar',
+    data: {
+      labels: ['18-25','26-30','31-35','36-40','41-45','46-50','51-55','56-60','61-65','66-70'],
+      datasets: [{ label: 'Customers', data: [18,22,28,24,20,18,16,14,12,8], backgroundColor: '#a078c8', borderRadius: 6, borderSkipped: false }]
+    },
+    options: { responsive: true, plugins: { legend: { display: false }, tooltip: { ...T, callbacks: { title: c => `Age: ${c[0].label}`, label: c => ` ${c.raw} customers` } } }, scales: { y: { grid: { color: '#f0e8f8' }, ticks: { color: '#8878a0' } }, x: { grid: { display: false }, ticks: { color: '#8878a0', font: { size: 10 } } } } }
+  });
+  new Chart(document.getElementById('incomeChart'), {
+    type: 'bar',
+    data: {
+      labels: ['15-25k','26-35k','36-45k','46-55k','56-65k','66-75k','76-85k','86-95k','96-105k','106-115k','116-137k'],
+      datasets: [{ label: 'Customers', data: [10,16,22,28,24,20,18,22,16,14,10], backgroundColor: '#9060c8', borderRadius: 6, borderSkipped: false }]
+    },
+    options: { responsive: true, plugins: { legend: { display: false }, tooltip: { ...T, callbacks: { title: c => `Income: ${c[0].label}`, label: c => ` ${c.raw} customers` } } }, scales: { y: { grid: { color: '#f0e8f8' }, ticks: { color: '#8878a0' } }, x: { grid: { display: false }, ticks: { color: '#8878a0', font: { size: 9 } } } } }
+  });
+  new Chart(document.getElementById('spendingChart'), {
+    type: 'bar',
+    data: {
+      labels: ['1-10','11-20','21-30','31-40','41-50','51-60','61-70','71-80','81-90','91-99'],
+      datasets: [{ label: 'Customers', data: [8,16,18,20,26,24,22,20,18,8], backgroundColor: '#f090c0', borderRadius: 6, borderSkipped: false }]
+    },
+    options: { responsive: true, plugins: { legend: { display: false }, tooltip: { ...T, callbacks: { title: c => `Score: ${c[0].label}`, label: c => ` ${c.raw} customers` } } }, scales: { y: { grid: { color: '#f0e8f8' }, ticks: { color: '#8878a0' } }, x: { grid: { display: false }, ticks: { color: '#8878a0', font: { size: 10 } } } } }
+  });
+  new Chart(document.getElementById('corrChart'), {
+    type: 'bar',
+    data: {
+      labels: ['Age vs Income', 'Age vs Spending Score', 'Income vs Spending Score'],
+      datasets: [{
+        label: 'Correlation',
+        data: [-0.012, -0.327, 0.010],
+        backgroundColor: [-0.012, -0.327, 0.010].map(v => v < 0 ? '#c878a8' : '#9060c8'),
+        borderColor:      [-0.012, -0.327, 0.010].map(v => v < 0 ? '#a05888' : '#7040a8'),
+        borderWidth: 1.5,
+        borderRadius: 6,
+        borderSkipped: false
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true,
+      plugins: {
+        legend: { display: false },
+        tooltip: { ...T, callbacks: { label: c => ` Correlation: ${c.raw}` } }
+      },
+      scales: {
+        x: { min: -0.5, max: 0.5, grid: { color: '#f0e8f8' }, ticks: { color: '#8878a0' }, border: { color: '#e0d8ec' } },
+        y: { grid: { display: false }, ticks: { color: '#2a1a3e', font: { size: 12 } } }
+      }
+    }
+  });
+  new Chart(document.getElementById('elbowChart'), {
+    type: 'line',
+    data: {
+      labels: [1,2,3,4,5,6,7,8,9,10],
+      datasets: [{
+        label: 'Inertia',
+        data: [269981,181363,106348,73679,44448,37233,30672,25744,22837,19589],
+        borderColor: '#9060c8', backgroundColor: 'rgba(144,96,200,.08)',
+        borderWidth: 2.5, fill: true, tension: 0.4,
+        pointBackgroundColor: (ctx) => ctx.dataIndex === 4 ? '#f090c0' : '#9060c8',
+        pointRadius: (ctx) => ctx.dataIndex === 4 ? 9 : 5,
+        pointHoverRadius: 9
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false }, tooltip: { ...T, callbacks: { title: c => `K = ${c[0].label}`, label: c => ` Inertia: ${Number(c.raw).toLocaleString()}` } } },
+      scales: { y: { grid: { color: '#f0e8f8' }, ticks: { color: '#8878a0' } }, x: { grid: { display: false }, ticks: { color: '#8878a0' }, title: { display: true, text: 'Number of Clusters (K)', color: '#8878a0', font: { size: 11 } } } }
+    }
+  });
+  const clusters = [
+    { label: '💰 High Income, Low Spender',  color: '#c878a8', pts: [[15,39],[16,6],[17,40],[18,6],[19,3],[20,29],[21,35],[22,55],[23,31],[24,66],[25,20],[26,75],[27,18],[28,19],[29,30],[30,22],[31,16],[32,17],[33,20],[34,21],[35,14],[36,15],[37,13],[38,14]] },
+    { label: '🎯 High Income, High Spender', color: '#9060c8', pts: [[70,97],[71,96],[72,97],[73,86],[74,95],[75,94],[76,100],[77,95],[78,99],[79,98],[81,100],[82,99],[83,97],[84,96],[85,99],[86,100],[87,92],[88,96],[89,100],[90,97],[98,100],[101,97],[103,100],[115,73]] },
+    { label: '📊 Average Everything',        color: '#a078c8', pts: [[39,61],[40,55],[42,60],[43,54],[44,61],[46,55],[47,58],[48,50],[49,56],[50,55],[51,49],[52,42],[53,45],[54,44],[55,45],[56,40],[57,43],[58,44],[59,41],[60,43],[61,41],[62,40],[63,30],[64,30],[65,28],[66,28],[67,29],[68,25],[69,24],[70,25]] },
+    { label: '🛍️ Low Income, High Spender', color: '#f090c0', pts: [[15,79],[15,81],[16,77],[17,76],[17,94],[18,94],[19,87],[20,86],[21,88],[22,79],[23,82],[24,73],[25,72],[26,73],[27,71],[28,73],[29,72],[30,71],[31,74],[32,73],[33,71]] },
+    { label: '💤 Low Income, Low Spender',  color: '#c0a0d0', pts: [[71,11],[72,14],[73,13],[74,12],[75,14],[76,14],[77,15],[78,12],[79,13],[80,14],[81,13],[82,14],[83,12],[84,11],[86,13],[87,14],[88,12],[89,13],[90,13],[91,13],[93,14],[97,12],[98,13],[99,14],[101,13],[103,12],[105,13],[110,11],[120,12],[135,13]] }
+  ];
+  new Chart(document.getElementById('clusterChart'), {
+    type: 'scatter',
+    data: {
+      datasets: clusters.map(c => ({
+        label: c.label,
+        data: c.pts.map(p => ({ x: p[0], y: p[1] })),
+        backgroundColor: c.color + 'bb', borderColor: c.color,
+        borderWidth: 1, pointRadius: 6, pointHoverRadius: 10
+      }))
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { position: 'bottom', labels: { color: '#8878a0', font: { family: 'DM Sans', size: 11 }, padding: 16, usePointStyle: true } },
+        tooltip: { ...T, callbacks: { title: c => c[0].dataset.label, label: c => [` Income: $${c.raw.x}k`, ` Spending Score: ${c.raw.y}`] } }
+      },
+      scales: {
+        x: { title: { display: true, text: 'Annual Income (k$)', color: '#8878a0' }, grid: { color: '#f0e8f8' }, ticks: { color: '#8878a0' } },
+        y: { title: { display: true, text: 'Spending Score (1–100)', color: '#8878a0' }, grid: { color: '#f0e8f8' }, ticks: { color: '#8878a0' } }
+      }
+    }
+  });
+</script>
+</body>
+</html>

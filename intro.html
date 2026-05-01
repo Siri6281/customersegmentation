@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Customer Segmentation — Synent Technologies</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --pink:    #c878a8;
+      --purple:  #9060c8;
+      --lilac:   #a078c8;
+      --soft:    #c0a0d0;
+      --blush:   #f090c0;
+      --bg:      #f5f4f8;
+      --dark:    #2a1a3e;
+      --muted:   #8878a0;
+    }
+
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      font-family: 'DM Sans', sans-serif;
+      overflow: hidden;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.2rem 2.5rem;
+      z-index: 100;
+      animation: fadeUp .5s ease both;
+    }
+    .logo {
+      font-family: 'Syne', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--dark);
+      letter-spacing: .07em;
+    }
+    .nav-tag {
+      font-size: 11px;
+      color: #b0a0c0;
+      letter-spacing: .04em;
+    }
+
+    /* ── LAYOUT ── */
+    .page {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      height: 100vh;
+    }
+
+    /* ── LEFT ── */
+    .left {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 7rem 3rem 3rem 3.5rem;
+      position: relative;
+      z-index: 2;
+    }
+
+    .eyebrow {
+      font-size: 11px;
+      letter-spacing: .13em;
+      text-transform: uppercase;
+      color: #fff;
+      background: var(--pink);
+      border-radius: 100px;
+      padding: 5px 15px;
+      display: inline-block;
+      margin-bottom: 1.5rem;
+      width: fit-content;
+      animation: fadeUp .5s ease .05s both;
+    }
+
+    h1 {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(36px, 5vw, 54px);
+      font-weight: 800;
+      color: var(--dark);
+      line-height: 1.05;
+      margin-bottom: 1.1rem;
+      animation: fadeUp .55s ease .15s both;
+    }
+    h1 em {
+      font-style: normal;
+      color: var(--purple);
+    }
+
+    .desc {
+      font-size: 14px;
+      font-weight: 300;
+      color: var(--muted);
+      line-height: 1.85;
+      max-width: 310px;
+      margin-bottom: 2.2rem;
+      animation: fadeUp .55s ease .25s both;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--purple);
+      color: #fff;
+      font-family: 'Syne', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      border: none;
+      border-radius: 100px;
+      padding: 13px 28px;
+      cursor: pointer;
+      width: fit-content;
+      letter-spacing: .04em;
+      text-decoration: none;
+      transition: background .2s, transform .15s, box-shadow .2s;
+      animation: fadeUp .55s ease .35s both;
+    }
+    .btn:hover {
+      background: #7040a8;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(144,96,200,.35);
+    }
+    .btn:active { transform: scale(.97); }
+
+    .arr {
+      width: 22px; height: 22px;
+      border-radius: 50%;
+      border: 1.5px solid rgba(255,255,255,.5);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px;
+      transition: transform .2s;
+    }
+    .btn:hover .arr { transform: translateX(3px); }
+
+
+
+    /* ── RIGHT ── */
+    .right {
+      position: relative;
+      overflow: hidden;
+      background: var(--bg);
+    }
+
+    .blob {
+      position: absolute;
+      border-radius: 50%;
+    }
+    .b1 {
+      width: 520px; height: 520px;
+      background: var(--pink);
+      top: -140px; right: -140px;
+      opacity: .32;
+      border-radius: 60% 40% 55% 45% / 50% 60% 40% 50%;
+      animation: morph1 9s ease-in-out infinite alternate;
+    }
+    .b2 {
+      width: 380px; height: 380px;
+      background: var(--soft);
+      bottom: -110px; right: -30px;
+      opacity: .45;
+      border-radius: 45% 55% 40% 60% / 55% 45% 60% 40%;
+      animation: morph2 8s ease-in-out infinite alternate;
+    }
+    .b3 {
+      width: 280px; height: 280px;
+      background: var(--lilac);
+      top: 80px; right: 90px;
+      opacity: .35;
+      border-radius: 50% 50% 45% 55%;
+      animation: morph1 10s ease-in-out 1s infinite alternate;
+    }
+    .b4 {
+      width: 150px; height: 150px;
+      background: var(--blush);
+      bottom: 80px; right: 260px;
+      opacity: .4;
+      border-radius: 50%;
+      animation: morph2 7s ease-in-out .5s infinite alternate;
+    }
+    .b5 {
+      width: 90px; height: 90px;
+      background: var(--purple);
+      top: 200px; right: 260px;
+      opacity: .2;
+      border-radius: 50%;
+      animation: morph1 6s ease-in-out 2s infinite alternate;
+    }
+
+    @keyframes morph1 {
+      from { border-radius: 60% 40% 55% 45% / 50% 60% 40% 50%; }
+      to   { border-radius: 40% 60% 45% 55% / 60% 40% 55% 45%; }
+    }
+    @keyframes morph2 {
+      from { border-radius: 45% 55% 40% 60% / 55% 45% 60% 40%; }
+      to   { border-radius: 55% 45% 60% 40% / 45% 55% 40% 60%; }
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <span class="logo">Synent Technologies</span>
+    <span class="nav-tag">Task 06 · Data Science Internship</span>
+  </nav>
+
+  <div class="page">
+    <div class="left">
+      <span class="eyebrow">Mall Customer Dataset</span>
+      <h1>Customer<br><em>Segmentation</em><br>Analysis</h1>
+      <p class="desc">
+        Discovering distinct customer groups through spending patterns and income levels — using K-Means clustering to turn data into actionable marketing strategy.
+      </p>
+      <a class="btn" href="main.html">
+        Get Started
+        <span class="arr">→</span>
+      </a>
+    </div>
+
+    <div class="right">
+      <div class="blob b1"></div>
+      <div class="blob b2"></div>
+      <div class="blob b3"></div>
+      <div class="blob b4"></div>
+      <div class="blob b5"></div>
+    </div>
+  </div>
+
+
+
+</body>
+</html>
