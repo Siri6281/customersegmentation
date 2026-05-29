@@ -1,5 +1,4 @@
 Customer Segmentation Analysis
-Synent Technologies — Data Science Internship | Task 06
 
 Problem Statement:
 
